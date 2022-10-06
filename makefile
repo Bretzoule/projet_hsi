@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Iinclude
+CFLAGS = -Wall -pedantic -Iinclude
 LDFLAGS = -lm
 RM = rm -rf
 SRC = $(wildcard $(srcdir)*.c)
