@@ -1,0 +1,123 @@
+{
+  "types": [
+    {
+      "nom": "bool_t",
+      "type": "atom*",
+      "declaration": "bool"
+    },
+    {
+      "nom": "crc8_t",
+      "type": "atom*",
+      "declaration": "uint8_t"
+    },
+    {
+      "nom": "tramenb_t",
+      "type": "atom*",
+      "declaration": "uint8_t"
+    },
+    {
+      "nom": "km_t",
+      "type": "atom*",
+      "declaration": "uint32_t"
+    },
+    {
+      "nom": "speed_t",
+      "type": "atom*",
+      "declaration": "uint8_t"
+    },
+    {
+      "nom": "frameissue_t",
+      "type": "enum",
+      "declaration": ["none", "tirePressure", "usedBrakes"]
+    },
+    {
+      "nom": "motorissue_t",
+      "type": "enum",
+      "declaration": ["none", "pressureError", "ldrTemperature", "oilOverheat"]
+    },
+    {
+      "nom": "fuellvl_t",
+      "type": "atom*",
+      "declaration": "uint8_t"
+    },
+    {
+      "nom": "rpm_t",
+      "type": "atom*",
+      "declaration": "uint32_t"
+    },
+    {
+      "nom": "batteryissue_t",
+      "type": "enum",
+      "declaration": ["none", "empty", "failure"]
+    },
+    {
+      "nom": "indicatorLightPosition_t",
+      "type": "atom*",
+      "declaration": "bool"
+    },
+    {
+        "nom": "dippedBeanWarningLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "highBeamWarningLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "fuelLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "engineFaultLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "tirePressureWarningLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "padsLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "lowBatteryLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "warningLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "batteryFailureLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "LDRtempLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+        "nom": "enginePressureLight_t",
+        "type": "atom*",
+        "declaration": "bool"
+    },
+    {
+      "nom": "enginePressureLight_t",
+      "type": "atom*",
+      "declaration": "bool"
+  },
+    {
+      "nom": ""
+    }
+  ],
+  "data": []
+}
