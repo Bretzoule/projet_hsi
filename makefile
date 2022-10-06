@@ -4,6 +4,7 @@ LDFLAGS = -lm
 RM = rm -rf
 SRC = $(wildcard $(srcdir)*.c)
 HEAD = $(wildcard $(includedir)*.h)
+STATIC = $(wildcard $(includedir)*.a)
 OBJ = $(subst $(srcdir), $(bindir),$(SRC:.c=.o))
 PROG = $(bindir)projet
 srcdir = ./src/
@@ -14,7 +15,6 @@ includedir = ./include/
 CP = cp
 
 all: $(PROG)
-
 $(PROG): $(OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
@@ -24,6 +24,11 @@ $(PROG): $(OBJ)
 .PHONY: clean
 clean :
 	$(RM) $(OBJ) core
+
+
+.PHONY: buildTypes
+buildTypes :
+	node ./script/index.js
 
 .PHONY: save
 save : savehead

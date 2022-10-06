@@ -1,123 +1,189 @@
 {
   "types": [
     {
-      "nom": "bool_t",
+      "name": "isActivate_t",
       "type": "atom*",
-      "declaration": "bool"
+      "declaration": "bool",
+      "domain": "val == 0 || val == 1"
+    },
+
+    {
+      "name": "crc8_t",
+      "type": "atom*",
+      "declaration": "uint8_t",
+      "domain": "val >= 0"
     },
     {
-      "nom": "crc8_t",
+      "name": "tramenb_t",
       "type": "atom*",
-      "declaration": "uint8_t"
+      "declaration": "uint8_t",
+      "domain": "(val = val % 100) || 1"
     },
     {
-      "nom": "tramenb_t",
+      "name": "km_t",
       "type": "atom*",
-      "declaration": "uint8_t"
+      "declaration": "uint32_t",
+      "domain": "val >= 0"
     },
     {
-      "nom": "km_t",
+      "name": "speed_t",
       "type": "atom*",
-      "declaration": "uint32_t"
+      "declaration": "uint8_t",
+      "domain": "val <= 255 && val >= 0"
     },
     {
-      "nom": "speed_t",
-      "type": "atom*",
-      "declaration": "uint8_t"
-    },
-    {
-      "nom": "frameissue_t",
+      "name": "frameissue_t",
       "type": "enum",
-      "declaration": ["none", "tirePressure", "usedBrakes"]
+      "declaration": ["noFrameIssue", "tirePressure", "usedBrakes"],
+      "domain": "val < 3 && val >= 0"
     },
     {
-      "nom": "motorissue_t",
+      "name": "motorissue_t",
       "type": "enum",
-      "declaration": ["none", "pressureError", "ldrTemperature", "oilOverheat"]
+      "declaration": ["noMotorIssue", "pressureError", "ldrTemperature", "oilOverheat"],
+      "domain": "val < 4 && val >= 0"
     },
     {
-      "nom": "fuellvl_t",
+      "name": "fuellvl_t",
       "type": "atom*",
-      "declaration": "uint8_t"
+      "declaration": "uint8_t",
+      "domain": "val >= 0 && val <= 40"
     },
     {
-      "nom": "rpm_t",
+      "name": "rpm_t",
       "type": "atom*",
-      "declaration": "uint32_t"
+      "declaration": "uint32_t",
+      "domain": "value <= 10000"
     },
     {
-      "nom": "batteryissue_t",
+      "name": "batteryissue_t",
       "type": "enum",
-      "declaration": ["none", "empty", "failure"]
+      "declaration": ["noBatteryIssue", "empty", "failure"],
+      "domain": "val < 3 && val >= 0"
     },
     {
-      "nom": "indicatorLightPosition_t",
+      "name": "isOnIndicator",
       "type": "atom*",
-      "declaration": "bool"
-    },
-    {
-        "nom": "dippedBeanWarningLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "highBeamWarningLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "fuelLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "engineFaultLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "tirePressureWarningLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "padsLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "lowBatteryLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "warningLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "batteryFailureLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "LDRtempLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-        "nom": "enginePressureLight_t",
-        "type": "atom*",
-        "declaration": "bool"
-    },
-    {
-      "nom": "enginePressureLight_t",
-      "type": "atom*",
-      "declaration": "bool"
-  },
-    {
-      "nom": ""
+      "declaration": "bool",
+      "domain": "val == 0 || val == 1"
     }
   ],
-  "data": []
+  "data": [
+    {
+      "id": "01",
+      "name": "isActivateWarning",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the warnings are on"
+    },
+
+    {
+      "id": "02",
+      "name": "isActivateStateLight",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the states lights are on"
+    },
+
+    {
+      "id": "03",
+      "name": "isActivateDippedBeam",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the dipped beam are on"
+    },
+
+    {
+      "id": "04",
+      "name": "isActivateMainBeam",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the main beam are on"
+    },
+
+    {
+      "id": "05",
+      "name": "isActivateRightTurnSignal",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the right turn signal is on"
+    },
+
+    {
+      "id": "06",
+      "name": "isActivateLeftTurnSignal",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the left turn signal is on"
+    },
+
+    {
+      "id": "07",
+      "name": "isActivateWindshieldWiper",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the windshield wiper are on"
+    },
+
+    {
+      "id": "08",
+      "name": "isActivateIceWasher",
+      "type": "isActivate_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the ice washer are on"
+    },
+
+    {
+      "id": "09",
+      "name": "crc8",
+      "type": "crc8_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know value of CR C8"
+    },
+
+    {
+      "id": "10",
+      "name": "trameNb",
+      "type": "tramenb_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know the nb of trame"
+    },
+
+    {
+      "id": "11",
+      "name": "km",
+      "type": "km_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know the nb of km"
+    },
+
+    {
+      "id": "12",
+      "name": "speed",
+      "type": "speed_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know the speed"
+    },
+
+    {
+      "id": "13",
+      "name": "frameIssue",
+      "type": "frameissue_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know the speed"
+    }
+  ]
 }
