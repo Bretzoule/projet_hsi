@@ -1,40 +1,22 @@
-CC = gcc
-CFLAGS = -Wall -pedantic -Iinclude
-LDFLAGS = -lm
-RM = rm -rf
-SRC = $(wildcard $(srcdir)*.c)
-HEAD = $(wildcard $(includedir)*.h)
-OBJ = $(subst $(srcdir), $(bindir),$(SRC:.c=.o))
-PROG = $(bindir)projet
-srcdir = ./src/
-docdir = ./doc/
-bindir = ./bin/
-savedir = ./save/
-includedir = ./include/
-CP = cp
+ROOTDIR=./
+TOOLSDIR=$(ROOTDIR)tools/
+APPDIR=$(ROOTDIR)app/
 
-all: $(PROG)
+include $(APPDIR)/makefile
 
-$(PROG): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+all: APP
 
-./bin/%.o : ./src/%.c
-	$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
-	
-.PHONY: clean
-clean :
-	$(RM) $(OBJ) core
+PHONY: runall
+runall: rundriver runapp
 
-.PHONY: save
-save : savehead
-	$(CP) $(SRC) $(savedir)
-savehead: 
-	$(CP) $(HEAD) $(savedir)
 
-.PHONY: mrproper
-mrproper :
-	$(RM) -f $(bindir)* $(docdir)html/ $(docdir)latex/ $(savedir)*
-	
-.PHONY: doxy
-doxy:
-	doxygen ./doc/Doxyfile && firefox ./doc/html/index.html
+PHONY: runapp
+runapp:
+	$(bindir)$(PROGNAME)
+
+
+PHONY: rundriver
+rundriver:
+	./tools/driver &
+
+
