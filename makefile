@@ -6,16 +6,16 @@ include $(APPDIR)/makefile
 
 all: APP
 
-PHONY: runall
+.PHONY: runall
 runall: rundriver runapp
 
 
-PHONY: runapp
+.PHONY: runapp
 runapp:
 	$(bindir)$(PROGNAME)
 
 
-PHONY: rundriver
+.PHONY: rundriver
 rundriver:
 	./tools/driver &
 

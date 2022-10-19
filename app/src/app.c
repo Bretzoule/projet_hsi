@@ -2,7 +2,7 @@
  * \file main.c
  * \brief Description breve
  * \details Details ou notes d’implementation (peut rester vide)
- * \author Mathilde HAMON <<hamonmathi@cy-tech.fr>>
+ * \author Mathilde HAMON <hamonmathi@cy-tech.fr>
  */
 
 #include "drv_api.h"
