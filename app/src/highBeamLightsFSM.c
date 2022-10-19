@@ -65,6 +65,12 @@
  */
 #define EV_ACQ_HIGHBEAM_RECEIVED 2
 
+/*!
+ *  \def HIGHBEAM_LIGHTS_MASK
+ *  \brief mask to get the digit of heighbeam lights indicator
+ */
+#define HIGHBEAM_LIGHTS_MASK 0b00010000
+
 typedef struct
 {
     int state;
@@ -111,25 +117,25 @@ static int GetNextEvent(int current_state)
     switch (current_state)
     {
     case ST_HIGHBEAM_LIGHTS_OFF:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & HIGHBEAM_LIGHTS_MASK) == 0b00010000)
             event = EV_TURN_HIGHBEAM_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & HIGHBEAM_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_HIGHBEAM_LIGHTS_OFF;
         break;
 
     case ST_HIGHBEAM_LIGHTS_ON:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & HIGHBEAM_LIGHTS_MASK) == 0b00010000)
             event = EV_TURN_HIGHBEAM_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & HIGHBEAM_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_HIGHBEAM_LIGHTS_OFF;
-        if (decodedACQLNS == 0b01000000)
+        if ((decodedACQLNS & HIGHBEAM_LIGHTS_MASK) == 0b00010000)
             event = EV_ACQ_HIGHBEAM_RECEIVED;
         // if(decodedACQLNS == 0) event = EV_NONE // ERROR
         break;
     case ST_HIGHBEAM_ACQ:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & HIGHBEAM_LIGHTS_MASK) == 0b00010000)
             event = EV_TURN_HIGHBEAM_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & HIGHBEAM_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_HIGHBEAM_LIGHTS_OFF;
         break;
     }

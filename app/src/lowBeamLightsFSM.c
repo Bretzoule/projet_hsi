@@ -65,6 +65,12 @@
  */
 #define EV_ACQ_LOWBEAM_RECEIVED 2
 
+/*!
+ *  \def LOWBEAM_LIGHTS_MASK
+ *  \brief mask to get the digit of lowbeam lights indicator
+ */
+#define LOWBEAM_LIGHTS_MASK 0b00100000
+
 typedef struct
 {
     int state;
@@ -111,25 +117,25 @@ static int GetNextEvent(int current_state)
     switch (current_state)
     {
     case ST_LOWBEAM_LIGHTS_OFF:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & LOWBEAM_LIGHTS_MASK) == 0b00100000)
             event = EV_TURN_LOWBEAM_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & LOWBEAM_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_LOWBEAM_LIGHTS_OFF;
         break;
 
     case ST_LOWBEAM_LIGHTS_ON:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & LOWBEAM_LIGHTS_MASK) == 0b00100000)
             event = EV_TURN_LOWBEAM_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & LOWBEAM_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_LOWBEAM_LIGHTS_OFF;
-        if (decodedACQLNS == 0b01000000)
+        if ((decodedACQLNS & LOWBEAM_LIGHTS_MASK) == 0b00100000)
             event = EV_ACQ_LOWBEAM_RECEIVED;
         // if(decodedACQLNS == 0) event = EV_NONE // ERROR
         break;
     case ST_LOWBEAM_ACQ:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & LOWBEAM_LIGHTS_MASK) == 0b00100000)
             event = EV_TURN_LOWBEAM_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & LOWBEAM_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_LOWBEAM_LIGHTS_OFF;
         break;
     }

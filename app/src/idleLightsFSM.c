@@ -65,6 +65,14 @@
  */
 #define EV_ACQ_IDLE_RECEIVED 2
 
+
+/*!
+ *  \def IDLE_LIGHTS_MASK
+ *  \brief mask to get the digit of idle lights indicator
+ */
+#define IDLE_LIGHTS_MASK 0b01000000
+
+
 typedef struct
 {
     int state;
@@ -110,25 +118,25 @@ static int GetNextEvent(int current_state)
     switch (current_state)
     {
     case ST_IDLE_LIGHTS_OFF:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & IDLE_LIGHTS_MASK) == 0b01000000)
             event = EV_TURN_IDLE_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & IDLE_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_IDLE_LIGHTS_OFF;
         break;
 
     case ST_IDLE_LIGHTS_ON:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & IDLE_LIGHTS_MASK) == 0b01000000)
             event = EV_TURN_IDLE_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & IDLE_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_IDLE_LIGHTS_OFF;
-        if (decodedACQLNS == 0b01000000)
+        if ((decodedACQLNS & IDLE_LIGHTS_MASK) == 0b01000000)
             event = EV_ACQ_IDLE_RECEIVED;
         // if(decodedACQLNS == 0) event = EV_NONE // ERROR
         break;
     case ST_IDLE_ACQ:
-        if (decodedLNS == 0b01000000)
+        if ((decodedLNS & IDLE_LIGHTS_MASK) == 0b01000000)
             event = EV_TURN_IDLE_LIGHTS_ON;
-        if (decodedLNS == 0b00000000)
+        if ((decodedLNS & IDLE_LIGHTS_MASK) == 0b00000000)
             event = EV_TURN_IDLE_LIGHTS_OFF;
         break;
     }
