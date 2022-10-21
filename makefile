@@ -1,24 +1,25 @@
 CC = gcc
-CFLAGS = -Wall -pedantic -Iinclude
+CFLAGS = -Wall -pedantic -I $(INCLUDEDIR)
 LDFLAGS = -lm
 RM = rm -rf
-SRC = $(wildcard $(srcdir)*.c)
-HEAD = $(wildcard $(includedir)*.h)
-OBJ = $(subst $(srcdir), $(bindir),$(SRC:.c=.o))
-PROG = $(bindir)projet
-srcdir = ./src/
-docdir = ./doc/
-bindir = ./bin/
-savedir = ./save/
-includedir = ./include/
+SRC = $(wildcard $(SRCDIR)*.c)
+STATIC = $(wildcard $(SRCDIR)*.a)
+HEAD = $(wildcard $(INCLUDEDIR)*.h)
+OBJ = $(subst $(SRCDIR), $(BINDIR),$(SRC:.c=.o))
+PROG = $(BINDIR)app
+SRCDIR = $(APPDIR)src/
+DOCDIR = $(APPDIR)doc/
+BINDIR = $(APPDIR)bin/
+SAVEDIR = $(APPDIR)save/
+INCLUDEDIR = $(APPDIR)include/
 CP = cp
 
-all: $(PROG)
+APP: $(PROG)
 
 $(PROG): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(STATIC)
 
-./bin/%.o : ./src/%.c
+$(BINDIR)%.o : $(SRCDIR)%.c
 	$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
 	
 .PHONY: clean
@@ -27,13 +28,13 @@ clean :
 
 .PHONY: save
 save : savehead
-	$(CP) $(SRC) $(savedir)
+	$(CP) $(SRC) $(SAVEDIR)
 savehead: 
-	$(CP) $(HEAD) $(savedir)
+	$(CP) $(HEAD) $(SAVEDIR)
 
 .PHONY: mrproper
 mrproper :
-	$(RM) -f $(bindir)* $(docdir)html/ $(docdir)latex/ $(savedir)*
+	$(RM) -f $(BINDIR)* $(DOCDIR)html/ $(DOCDIR)latex/ $(SAVEDIR)*
 	
 .PHONY: doxy
 doxy:
