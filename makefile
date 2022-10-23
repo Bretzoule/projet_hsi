@@ -1,45 +1,22 @@
-CC = gcc
-CFLAGS = -Wall -pedantic -Iinclude
-LDFLAGS = -lm
-RM = rm -rf
-SRC = $(wildcard $(srcdir)*.c)
-HEAD = $(wildcard $(includedir)*.h)
-STATIC = $(wildcard $(includedir)*.a)
-OBJ = $(subst $(srcdir), $(bindir),$(SRC:.c=.o))
-PROG = $(bindir)projet
-srcdir = ./src/
-docdir = ./doc/
-bindir = ./bin/
-savedir = ./save/
-includedir = ./include/
-CP = cp
+ROOTDIR=./
+TOOLSDIR=$(ROOTDIR)tools/
+APPDIR=$(ROOTDIR)app/
 
-all: $(PROG)
-$(PROG): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+include $(APPDIR)/makefile
 
-./bin/%.o : ./src/%.c
-	$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
-	
-.PHONY: clean
-clean :
-	$(RM) $(OBJ) core
+all: APP
+
+.PHONY: runall
+runall: rundriver runapp
 
 
-.PHONY: buildTypes
-buildTypes :
-	node ./script/index.js
+.PHONY: runapp
+runapp:
+	$(bindir)$(PROGNAME)
 
-.PHONY: save
-save : savehead
-	$(CP) $(SRC) $(savedir)
-savehead: 
-	$(CP) $(HEAD) $(savedir)
 
-.PHONY: mrproper
-mrproper :
-	$(RM) -f $(bindir)* $(docdir)html/ $(docdir)latex/ $(savedir)*
-	
-.PHONY: doxy
-doxy:
-	doxygen ./doc/Doxyfile && firefox ./doc/html/index.html
+.PHONY: rundriver
+rundriver:
+	./tools/driver &
+
+
