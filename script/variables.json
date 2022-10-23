@@ -40,7 +40,12 @@
     {
       "name": "motorissue_t",
       "type": "enum",
-      "declaration": ["noMotorIssue", "pressureError", "ldrTemperature", "oilOverheat"],
+      "declaration": [
+        "noMotorIssue",
+        "pressureError",
+        "ldrTemperature",
+        "oilOverheat"
+      ],
       "domain": "val < 4 && val >= 0"
     },
     {
@@ -63,6 +68,12 @@
     },
     {
       "name": "isOnIndicator",
+      "type": "atom*",
+      "declaration": "bool",
+      "domain": "val == 0 || val == 1"
+    },
+    {
+      "name": "isAcquited_t",
       "type": "atom*",
       "declaration": "bool",
       "domain": "val == 0 || val == 1"
@@ -184,6 +195,33 @@
       "dimension": "1",
       "initVal": "0",
       "comment": "are used to know the speed"
+    },
+
+    {
+      "id": "14",
+      "name": "idleIsAcquited",
+      "type": "isAcquited_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the light is on"
+    },
+
+    {
+      "id": "15",
+      "name": "highBeamIsAcquited",
+      "type": "isAcquited_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the light is on"
+    },
+
+    {
+      "id": "16",
+      "name": "lowBeamIsAcquited",
+      "type": "isAcquited_t",
+      "dimension": "1",
+      "initVal": "0",
+      "comment": "are used to know if the light is on"
     }
   ]
 }
