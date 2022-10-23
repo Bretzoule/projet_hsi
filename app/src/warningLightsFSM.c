@@ -131,8 +131,9 @@ tTransition trans[] = {
     {ST_WARNING_LIGHTS_ENABLED_OFF, EV_NONE, &fsmError, ST_ERROR},
     {ST_WARNING_LIGHTS_ENABLED_ON, EV_ACQ_WARNING_LIGHTS_RECEIVED, &notifyListeners, ST_WARNING_LIGHTS_ON_ACQ},
     {ST_WARNING_LIGHTS_ENABLED_OFF, EV_ACQ_WARNING_LIGHTS_RECEIVED, &notifyListeners, ST_WARNING_LIGHTS_OFF_ACQ},
-    {ST_WARNING_LIGHTS_ON_ACQ, EV_ACQ_WARNING_LIGHTS_ENABLED_ON, NULL, ST_WARNING_LIGHTS_OFF_ACQ},
+    {ST_WARNING_LIGHTS_ON_ACQ, EV_ACQ_WARNING_LIGHTS_ENABLED_ON, NULL, ST_WARNING_LIGHTS_ON_ACQ},
     {ST_WARNING_LIGHTS_OFF_ACQ, EV_ACQ_WARNING_LIGHTS_ENABLED_OFF, &turnWarningLightsEnabledAndACQOff, ST_WARNING_LIGHTS_ON_ACQ},
+    {ST_WARNING_LIGHTS_OFF_ACQ, EV_ACQ_WARNING_LIGHTS_ENABLED_OFF, NULL, ST_WARNING_LIGHTS_OFF_ACQ},
     {ST_WARNING_LIGHTS_ON_ACQ, EV_ACQ_WARNING_LIGHTS_ENABLED_OFF, &turnWarningLightsEnabledAndACQOn, ST_WARNING_LIGHTS_OFF_ACQ}};
 
 #define TRANS_COUNT (sizeof(trans) / sizeof(*trans))
@@ -158,9 +159,46 @@ static int GetNextEvent(int current_state)
     switch (current_state)
     {
     case ST_WARNING_LIGHTS_OFF:
-    if((decodedLNS & WARNING_LIGHTS_MASK) == 0b10000000)
-        event = EV_TURN_WARNING_LIGHTS_ENABLED_ON;
-    //TODO: Complete states and conditions
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = EV_TURN_WARNING_LIGHTS_ENABLED_ON;
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b00000000)
+            event = EV_TURN_WARNING_LIGHTS_OFF;
+        break;
+    case ST_WARNING_LIGHTS_ENABLED_ON:
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = EV_TURN_WARNING_LIGHTS_ENABLED_ON;
+        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b00000000)
+            event = EV_TURN_WARNING_LIGHTS_OFF;
+        if ((decodedACQLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = EV_ACQ_WARNING_LIGHTS_RECEIVED;
+        if (((decodedACQLNS & WARNING_LIGHTS_MASK) != 0b10000000) && time >= 1000)
+            event = EV_NONE;
+        break;
+    case ST_WARNING_LIGHTS_ENABLED_OFF:
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = ST_WARNING_LIGHTS_ENABLED_OFF;
+        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b00000000)
+            event = EV_TURN_WARNING_LIGHTS_OFF;
+        if ((decodedACQLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = EV_ACQ_WARNING_LIGHTS_RECEIVED;
+        if (((decodedACQLNS & WARNING_LIGHTS_MASK) != 0b10000000) && time >= 1000)
+            event = EV_NONE;
+        break;
+    case ST_WARNING_LIGHTS_OFF_ACQ:
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = EV_ACQ_WARNING_LIGHTS_ENABLED_OFF;
+        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b00000000)
+            event = EV_TURN_WARNING_LIGHTS_OFF;
+        break;
+    case ST_WARNING_LIGHTS_ON_ACQ:
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b10000000)
+            event = EV_ACQ_WARNING_LIGHTS_ENABLED_ON;
+        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
+        if ((decodedLNS & WARNING_LIGHTS_MASK) == 0b00000000)
+            event = EV_TURN_WARNING_LIGHTS_OFF;
         break;
     }
     return event;
