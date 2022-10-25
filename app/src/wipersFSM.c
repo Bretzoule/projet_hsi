@@ -251,8 +251,8 @@ static int GetNextEvent(int current_state)
 {
     int event = EV_NONE;
 
-    u_int8_t decodedLNS = getLNS();
-    u_int8_t decodedACQLNS = getACQLNS();
+    uint8_t decodedLNS = getLNS();
+    uint8_t decodedACQLNS = getACQLNS();
 
     switch (current_state)
     {

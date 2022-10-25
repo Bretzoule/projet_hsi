@@ -14,6 +14,7 @@
 // Including library headers
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 /*!
  \def EXIT_SUCCESS
  \brief Exit code confirming program proper execution

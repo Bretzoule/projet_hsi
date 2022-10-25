@@ -107,14 +107,14 @@ static int lightsOff(int type)
 {
     switch (type)
     {
-    case 1:
-        setisActivateStateLight(0);
+    case IDLE:
+        setIsActivateStateLight(0);
         break;
-    case 2:
-        setisActivateDippedBeam(0);
+    case LOWBEAM:
+        setIsActivateDippedBeam(0);
         break;
-    case 3:
-        setisActivateMainBeam(0);
+    case HIGHBEAM:
+        setIsActivateMainBeam(0);
         break;
     }
     return 0;
@@ -132,14 +132,14 @@ static int LightsOn(int type)
 {
     switch (type)
     {
-    case 1:
-        setisActivateStateLight(1);
+    case IDLE:
+        setIsActivateStateLight(1);
         break;
-    case 2:
-        setisActivateDippedBeam(1);
+    case LOWBEAM:
+        setIsActivateDippedBeam(1);
         break;
-    case 3:
-        setisActivateMainBeam(1);
+    case HIGHBEAM:
+        setIsActivateMainBeam(1);
         break;
     }
     return 0;
@@ -171,14 +171,14 @@ static int acquitted(int type)
 {
     switch (type)
     {
-    case 1:
-        setidleIsAcquited(1);
+    case IDLE:
+        setIdleIsAcquited(1);
         break;
-    case 2:
-        sethighBeamIsAcquited(1);
+    case LOWBEAM:
+        setHighBeamIsAcquited(1);
         break;
-    case 3:
-        setlowBeamIsAcquited(1);
+    case HIGHBEAM:
+        setLowBeamIsAcquited(1);
         break;
     }
     return 0;
@@ -254,8 +254,8 @@ static int GetNextEvent(int current_state)
 {
     int event = EV_NONE;
 
-    u_int8_t decodedLNS = getLNS();
-    u_int8_t decodedACQLNS = getACQLNS();
+    uint8_t decodedLNS = getLNS();
+    uint8_t decodedACQLNS = getACQLNS();
 
     switch (current_state)
     {
@@ -272,6 +272,7 @@ static int GetNextEvent(int current_state)
         break;
     case ST_ERROR:
         break;
+        // TODO: Handle different light types cases
     }
     // switch (selectedLight)
     // {

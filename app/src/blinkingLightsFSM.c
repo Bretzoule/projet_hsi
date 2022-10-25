@@ -95,6 +95,18 @@
  */
 #define BLINK_LIGHTS_MASK 0b10000000
 
+/*!
+ *  \def LEFT
+ *  \brief left side for lights
+ */
+#define LEFT 0
+
+/*!
+ *  \def RIGHT
+ *  \brief right side for lights
+ */
+#define RIGHT 1
+
 /* States */
 #define ST_ANY -1
 #define ST_TERM 255
@@ -109,34 +121,162 @@ typedef struct
     int next_state;
 } tTransition;
 
-static int turnWarningLightsEnabledOff(void);
-static int turnWarningLightsEnabledOn(void);
-static int turnWarningLightsEnabledAndACQOff(void);
-static int turnWarningLightsEnabledAndACQOn(void);
-static int turnWarningLightsOff(void);
-static int fsmError(void);
+/*!
+ *  \fn static int turnLightOff(int side)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Mar 25 Octobre 2022 - 22:00:40
+ *  \brief Handles lights off state
+ *  \param int side: the side of the light to turn on
+ *  \return 0
+ */
+static int turnLightOff(int side)
+{
+    switch (side)
+    {
+    case LEFT:
+        setIsActivateLeftBlinker(0);
+        break;
+    case RIGHT:
+        setIsActivateRightBlinker(0);
+        break;
+    default:
+        setIsActivateRightBlinker(0);
+        setIsActivateLeftBlinker(0);
+    }
+    return 0;
+}
+/*!
+ *  \fn static int turnLightEnabledOn(int side)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Mar 25 Octobre 2022 - 22:00:40
+ *  \brief Handles lights on and enabled state
+ *  \param int side: the side of the light to turn on
+ *  \return 0
+ */
+static int turnLightEnabledOn(int side)
+{
+    switch (side)
+    {
+    case LEFT:
+        setisActivateAndEnabledLeftBlinker(1);
+        break;
+    case RIGHT:
+        setisActivateAndEnabledRightBlinker(1);
+        break;
+    default:
+        setisActivateAndEnabledLeftBlinker(1);
+        setisActivateAndEnabledRightBlinker(1);
+    }
+    return 0;
+}
+/*!
+ *  \fn static int turnLightEnabledOff(int side)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Mar 25 Octobre 2022 - 22:00:40
+ *  \brief Handles lights off and enabled state
+ *  \param int side: the side of the light to turn on
+ *  \return 0
+ */
+static int turnLightEnabledOff(int side)
+{
+    switch (side)
+    {
+    case LEFT:
+        setisActivateAndEnabledLeftBlinker(0);
+        break;
+    case RIGHT:
+        setisActivateAndEnabledRightBlinker(0);
+        break;
+    default:
+        setisActivateAndEnabledLeftBlinker(0);
+        setisActivateAndEnabledRightBlinker(0);
+    }
+    return 0;
+}
+
+static int turnLightEnabledAndACQOn(int side);
+// TODO: Implement the "lights enabled, on and aquited" function
+static int turnLightEnabledAndACQOff(int side);
+// TODO: Implement the "lights enabled, off and aquited" function
+
+/*!
+ *  \fn static int fsmError(void)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Dim 23 Octobre 2022 - 17:41:18
+ *  \brief prints error on fsm error
+ *  \return 0
+ */
+static int fsmError(void)
+{
+    printf("FsmError\n");
+    return 0;
+}
+
 static int notifyListeners(void);
+//TODO: Implement the notifyListeners function
 
 /* Transitions */
 tTransition trans[] = {
     {ST_BLINK_LIGHTS_OFF, EV_TURN_BLINK_LIGHTS_OFF, NULL, ST_BLINK_LIGHTS_OFF},
-    {ST_BLINK_LIGHTS_OFF, EV_TURN_BLINK_LIGHTS_ENABLED_ON, &turnWarningLightsEnabledOn, ST_BLINK_LIGHTS_ENABLED_ON},
+    {ST_BLINK_LIGHTS_OFF, EV_TURN_BLINK_LIGHTS_ENABLED_ON, &turnLightEnabledOn, ST_BLINK_LIGHTS_ENABLED_ON},
     {ST_BLINK_LIGHTS_ENABLED_ON, EV_TURN_BLINK_LIGHTS_ENABLED_ON, NULL, ST_BLINK_LIGHTS_ENABLED_ON},
-    {ST_BLINK_LIGHTS_ENABLED_ON, EV_TURN_BLINK_LIGHTS_ENABLED_OFF, &turnWarningLightsEnabledOff, ST_BLINK_LIGHTS_ENABLED_ON},
-    {ST_BLINK_LIGHTS_ENABLED_ON, EV_TURN_BLINK_LIGHTS_OFF, &turnWarningLightsOff, ST_BLINK_LIGHTS_OFF},
-    {ST_BLINK_LIGHTS_ENABLED_OFF, EV_TURN_BLINK_LIGHTS_OFF, &turnWarningLightsOff, ST_BLINK_LIGHTS_OFF},
+    {ST_BLINK_LIGHTS_ENABLED_ON, EV_TURN_BLINK_LIGHTS_OFF, &turnLightOff, ST_BLINK_LIGHTS_OFF},
+    {ST_BLINK_LIGHTS_ENABLED_OFF, EV_TURN_BLINK_LIGHTS_OFF, &turnLightOff, ST_BLINK_LIGHTS_OFF},
     {ST_BLINK_LIGHTS_ENABLED_OFF, EV_TURN_BLINK_LIGHTS_ENABLED_OFF, NULL, ST_BLINK_LIGHTS_ENABLED_OFF},
-    {ST_BLINK_LIGHTS_ENABLED_OFF, EV_TURN_BLINK_LIGHTS_ENABLED_ON, &turnWarningLightsEnabledOn, ST_BLINK_LIGHTS_ENABLED_ON},
     {ST_BLINK_LIGHTS_ENABLED_ON, EV_NONE, &fsmError, ST_ERROR},
     {ST_BLINK_LIGHTS_ENABLED_OFF, EV_NONE, &fsmError, ST_ERROR},
     {ST_BLINK_LIGHTS_ENABLED_ON, EV_ACQ_BLINK_LIGHTS_RECEIVED, &notifyListeners, ST_BLINK_LIGHTS_ON_ACQ},
     {ST_BLINK_LIGHTS_ENABLED_OFF, EV_ACQ_BLINK_LIGHTS_RECEIVED, &notifyListeners, ST_BLINK_LIGHTS_OFF_ACQ},
     {ST_BLINK_LIGHTS_ON_ACQ, EV_ACQ_BLINK_LIGHTS_ENABLED_ON, NULL, ST_BLINK_LIGHTS_ON_ACQ},
-    {ST_BLINK_LIGHTS_OFF_ACQ, EV_ACQ_BLINK_LIGHTS_ENABLED_OFF, &turnWarningLightsEnabledAndACQOff, ST_BLINK_LIGHTS_ON_ACQ},
+    {ST_BLINK_LIGHTS_ON_ACQ, EV_TURN_BLINK_LIGHTS_OFF, &turnLightOff, ST_BLINK_LIGHTS_OFF},
+    {ST_BLINK_LIGHTS_ENABLED_OFF, EV_TURN_BLINK_LIGHTS_OFF, &turnLightOff, ST_BLINK_LIGHTS_OFF},
+    {ST_BLINK_LIGHTS_OFF_ACQ, EV_ACQ_BLINK_LIGHTS_ENABLED_OFF, &turnLightEnabledAndACQOff, ST_BLINK_LIGHTS_ON_ACQ},
     {ST_BLINK_LIGHTS_OFF_ACQ, EV_ACQ_BLINK_LIGHTS_ENABLED_OFF, NULL, ST_BLINK_LIGHTS_OFF_ACQ},
-    {ST_BLINK_LIGHTS_ON_ACQ, EV_ACQ_BLINK_LIGHTS_ENABLED_OFF, &turnWarningLightsEnabledAndACQOn, ST_BLINK_LIGHTS_OFF_ACQ}};
+    {ST_BLINK_LIGHTS_ON_ACQ, EV_TURN_BLINK_LIGHTS_ENABLED_OFF, &turnLightEnabledOff, ST_BLINK_LIGHTS_ENABLED_OFF},
+    {ST_BLINK_LIGHTS_OFF_ACQ, EV_TURN_BLINK_LIGHTS_ENABLED_ON, &turnLightEnabledOn, ST_BLINK_LIGHTS_ENABLED_ON}};
 
 #define TRANS_COUNT (sizeof(trans) / sizeof(*trans))
+
+
+// case ST_BLINK_LIGHTS_OFF:
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+    //         event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+    //         event = EV_TURN_BLINK_LIGHTS_OFF;
+    //     break;
+    // case ST_BLINK_LIGHTS_ENABLED_ON:
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+    //         event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
+    //     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+    //         event = EV_TURN_BLINK_LIGHTS_OFF;
+    //     if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+    //         event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
+    //     if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
+    //         event = EV_NONE;
+    //     break;
+    // case ST_BLINK_LIGHTS_ENABLED_OFF:
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+    //         event = ST_BLINK_LIGHTS_ENABLED_OFF;
+    //     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+    //         event = EV_TURN_BLINK_LIGHTS_OFF;
+    //     if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+    //         event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
+    //     if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
+    //         event = EV_NONE;
+    //     break;
+    // case ST_BLINK_LIGHTS_OFF_ACQ:
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+    //         event = EV_ACQ_BLINK_LIGHTS_ENABLED_OFF;
+    //     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
+    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+    //         event = EV_TURN_BLINK_LIGHTS_OFF;
+    //     break;
 
 /*!
  *  \fn static int GetNextEvent(int current_state)
@@ -151,54 +291,17 @@ static int GetNextEvent(int current_state)
 {
     int event = EV_NONE;
 
-    u_int8_t decodedLNS = getLNS();
-    u_int8_t time = getTime();
-    u_int8_t decodedACQLNS = getACQLNS();
+    uint8_t decodedLNS = getLNS();
+    uint8_t time = getTime();
+    uint8_t decodedACQLNS = getACQLNS();
 
     /* Build all the events */
     switch (current_state)
     {
-    case ST_BLINK_LIGHTS_OFF:
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-            event = EV_TURN_BLINK_LIGHTS_OFF;
+        case ST_BLINK_LIGHTS_OFF:
+        //TODO: Implement different blinkers "STATES" and "SIDES" !
         break;
-    case ST_BLINK_LIGHTS_ENABLED_ON:
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
-        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-            event = EV_TURN_BLINK_LIGHTS_OFF;
-        if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
-        if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
-            event = EV_NONE;
-        break;
-    case ST_BLINK_LIGHTS_ENABLED_OFF:
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = ST_BLINK_LIGHTS_ENABLED_OFF;
-        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-            event = EV_TURN_BLINK_LIGHTS_OFF;
-        if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
-        if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
-            event = EV_NONE;
-        break;
-    case ST_BLINK_LIGHTS_OFF_ACQ:
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = EV_ACQ_BLINK_LIGHTS_ENABLED_OFF;
-        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-            event = EV_TURN_BLINK_LIGHTS_OFF;
-        break;
-    case ST_BLINK_LIGHTS_ON_ACQ:
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-            event = EV_ACQ_BLINK_LIGHTS_ENABLED_ON;
-        // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
-        if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-            event = EV_TURN_BLINK_LIGHTS_OFF;
+        case ST_ERROR:
         break;
     }
     return event;
