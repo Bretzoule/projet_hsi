@@ -1,9 +1,8 @@
 const typeAndData = require("./variables.json");
 const fs = require("fs");
-const { exit } = require("process");
-const pathH = "include/";
+const pathH = "app/static/";
 const dotH = "types.h";
-const pathC = "src/";
+const pathC = "app/static/";
 const dotC = "types.c";
 const types = typeAndData.types;
 const data = typeAndData.data;
@@ -118,7 +117,6 @@ async function initFiles() {
     fs.unlinkSync(pathC + dotC);
   } catch (error) {
     console.error("Can't delete files, error. " + error);
-    exit(-1);
   }
 
   await writeToFile(headerC, pathC, dotC);

@@ -1,0 +1,16 @@
+OBJSTATIC = $(subst $(STATICDIR), $(BINDIR),$(SRCSTATIC:.c=.o))
+SRCSTATIC = $(wildcard $(STATICDIR)*.c)
+STATICLIB = $(SRCDIR)types.a
+
+STATIC: $(STATICLIB)
+
+$(STATICLIB): $(OBJSTATIC)
+	ar rcs $@ $^
+
+$(BINDIR)%.o: $(STATICDIR)%.c $(STATICDIR)%.h
+	gcc -c -o $@ $<
+
+.PHONY: cleangenerated
+cleangenerated:
+	@echo "Removing generated files."
+	@$(RM) $(STATICLIB)
