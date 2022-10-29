@@ -121,6 +121,15 @@ typedef struct
     int next_state;
 } tTransition;
 
+typedef struct currentHandledState
+{
+    int left;
+    int right;
+    int warnings;
+} currentHandledState;
+
+static currentHandledState savedState = {ST_BLINK_LIGHTS_OFF, ST_BLINK_LIGHTS_OFF, ST_BLINK_LIGHTS_OFF};
+
 /*!
  *  \fn static int turnLightOff(int side)
  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
@@ -217,7 +226,7 @@ static int fsmError(void)
 }
 
 static int notifyListeners(void);
-//TODO: Implement the notifyListeners function
+// TODO: Implement the notifyListeners function
 
 /* Transitions */
 tTransition trans[] = {
@@ -241,42 +250,41 @@ tTransition trans[] = {
 
 #define TRANS_COUNT (sizeof(trans) / sizeof(*trans))
 
-
 // case ST_BLINK_LIGHTS_OFF:
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-    //         event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-    //         event = EV_TURN_BLINK_LIGHTS_OFF;
-    //     break;
-    // case ST_BLINK_LIGHTS_ENABLED_ON:
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-    //         event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
-    //     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-    //         event = EV_TURN_BLINK_LIGHTS_OFF;
-    //     if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-    //         event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
-    //     if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
-    //         event = EV_NONE;
-    //     break;
-    // case ST_BLINK_LIGHTS_ENABLED_OFF:
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-    //         event = ST_BLINK_LIGHTS_ENABLED_OFF;
-    //     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-    //         event = EV_TURN_BLINK_LIGHTS_OFF;
-    //     if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-    //         event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
-    //     if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
-    //         event = EV_NONE;
-    //     break;
-    // case ST_BLINK_LIGHTS_OFF_ACQ:
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
-    //         event = EV_ACQ_BLINK_LIGHTS_ENABLED_OFF;
-    //     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
-    //     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
-    //         event = EV_TURN_BLINK_LIGHTS_OFF;
-    //     break;
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+//         event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+//         event = EV_TURN_BLINK_LIGHTS_OFF;
+//     break;
+// case ST_BLINK_LIGHTS_ENABLED_ON:
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+//         event = EV_TURN_BLINK_LIGHTS_ENABLED_ON;
+//     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+//         event = EV_TURN_BLINK_LIGHTS_OFF;
+//     if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+//         event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
+//     if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
+//         event = EV_NONE;
+//     break;
+// case ST_BLINK_LIGHTS_ENABLED_OFF:
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+//         event = ST_BLINK_LIGHTS_ENABLED_OFF;
+//     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre enabled_on et enabled_off après 1scd
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+//         event = EV_TURN_BLINK_LIGHTS_OFF;
+//     if ((decodedACQLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+//         event = EV_ACQ_BLINK_LIGHTS_RECEIVED;
+//     if (((decodedACQLNS & BLINK_LIGHTS_MASK) != 0b10000000) && time >= 1000)
+//         event = EV_NONE;
+//     break;
+// case ST_BLINK_LIGHTS_OFF_ACQ:
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b10000000)
+//         event = EV_ACQ_BLINK_LIGHTS_ENABLED_OFF;
+//     // TODO: À vérifier si on doit utiliser un event pour faire le passage entre acq_enabled_on et acq_enabled_on après 1scd
+//     if ((decodedLNS & BLINK_LIGHTS_MASK) == 0b00000000)
+//         event = EV_TURN_BLINK_LIGHTS_OFF;
+//     break;
 
 /*!
  *  \fn static int GetNextEvent(int current_state)
@@ -298,42 +306,92 @@ static int GetNextEvent(int current_state)
     /* Build all the events */
     switch (current_state)
     {
-        case ST_BLINK_LIGHTS_OFF:
-        //TODO: Implement different blinkers "STATES" and "SIDES" !
+    case ST_BLINK_LIGHTS_OFF:
+        // TODO: Implement different blinkers "STATES" and "SIDES" !
         break;
-        case ST_ERROR:
+    case ST_ERROR:
         break;
     }
     return event;
 }
 
-int blinkLightsFSM(void)
+/*!
+ *  \fn getCurrentState(int side)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Ven 28 Octobre 2022 - 18:05:09
+ *  \brief getter for each light state
+ *  \param int side : side of the light to get
+ *  \return current light state for the side
+ */
+getCurrentState(int side)
+{
+    int state;
+    switch (side)
+    {
+    case LEFT:
+        state = savedState.left;
+        break;
+    case RIGHT:
+        state = savedState.right;
+        break;
+    default:
+        state = savedState.warnings;
+        break;
+    }
+    return (state);
+}
+
+/*!
+ *  \fn void setCurrentState(int side, int state)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Ven 28 Octobre 2022 - 18:25:56
+ *  \brief saves state to a global var
+ *  \param int side: side of the light
+ *  \param int state: state of the light
+ */
+void setCurrentState(int side, int state)
+{
+    switch (side)
+    {
+    case LEFT:
+        savedState.left = state;
+        break;
+    case RIGHT:
+        savedState.right = state;
+        break;
+    default:
+        savedState.warnings = state;
+        break;
+    }
+}
+
+int blinkLightsFSM(int side)
 {
     int i = 0;
     int ret = 0;
     int event = EV_NONE;
-    int state = ST_BLINK_LIGHTS_OFF;
+    int state = getCurrentState(side);
 
     /* While FSM hasn't reach end state */
-    while (state != ST_ERROR)
+    /* Get event */
+    event = GetNextEvent(state);
+    /* For each transitions */
+    for (i = 0; i < TRANS_COUNT; i++)
     {
-        /* Get event */
-        event = GetNextEvent(state);
-        /* For each transitions */
-        for (i = 0; i < TRANS_COUNT; i++)
+        /* If State is current state OR The transition applies to all states ...*/
+        if ((state == trans[i].state) || (ST_ANY == trans[i].state))
         {
-            /* If State is current state OR The transition applies to all states ...*/
-            if ((state == trans[i].state) || (ST_ANY == trans[i].state))
+            /* If event is the transition event OR the event applies to all */
+            if ((event == trans[i].event) || (EV_ANY == trans[i].event))
             {
-                /* If event is the transition event OR the event applies to all */
-                if ((event == trans[i].event) || (EV_ANY == trans[i].event))
-                {
-                    /* Apply the new state */
-                    state = trans[i].next_state;
-                    /* Call the state function */
-                    ret = (trans[i].callback)();
-                    break;
-                }
+                /* Apply the new state */
+                state = trans[i].next_state;
+                setCurrentState(side, state);
+                /* Call the state function */
+                ret = (trans[i].callback)();
+                break;
             }
         }
     }

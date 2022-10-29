@@ -78,20 +78,9 @@ typedef struct
 {
     int state;
     int event;
-    int (*callback)(void);
+    int (*callback)(int lighttype);
     int next_state;
 } tTransition;
-
-/* Transitions */
-tTransition trans[] = {
-    {ST_LIGHTS_OFF, EV_TURN_LIGHTS_ON, &lightsOff, ST_LIGHTS_ON},
-    {ST_LIGHTS_OFF, EV_TURN_LIGHTS_OFF, NULL, ST_LIGHTS_OFF},
-    {ST_LIGHTS_ON, EV_TURN_LIGHTS_ON, NULL, ST_LIGHTS_ON},
-    {ST_LIGHTS_ON, EV_TURN_LIGHTS_OFF, &lightsOff, ST_LIGHTS_OFF},
-    {ST_LIGHTS_ON, EV_NONE, &fsmError, ST_ERROR},
-    {ST_LIGHTS_ON, EV_ACQ_RECEIVED, &notifyListeners, ST_ACQ},
-    {ST_ACQ, EV_TURN_LIGHTS_OFF, &lightsOff, ST_LIGHTS_OFF},
-    {ST_ACQ, EV_TURN_LIGHTS_ON, NULL, ST_ACQ}};
 
 #define TRANS_COUNT (sizeof(trans) / sizeof(*trans))
 
@@ -199,6 +188,17 @@ static int fsmError(void)
 };
 static int notifyListeners(void);
 
+/* Transitions */
+tTransition trans[] = {
+    {ST_LIGHTS_OFF, EV_TURN_LIGHTS_ON, &lightsOff, ST_LIGHTS_ON},
+    {ST_LIGHTS_OFF, EV_TURN_LIGHTS_OFF, NULL, ST_LIGHTS_OFF},
+    {ST_LIGHTS_ON, EV_TURN_LIGHTS_ON, NULL, ST_LIGHTS_ON},
+    {ST_LIGHTS_ON, EV_TURN_LIGHTS_OFF, &lightsOff, ST_LIGHTS_OFF},
+    {ST_LIGHTS_ON, EV_NONE, &fsmError, ST_ERROR},
+    {ST_LIGHTS_ON, EV_ACQ_RECEIVED, &notifyListeners, ST_ACQ},
+    {ST_ACQ, EV_TURN_LIGHTS_OFF, &lightsOff, ST_LIGHTS_OFF},
+    {ST_ACQ, EV_TURN_LIGHTS_ON, NULL, ST_ACQ}};
+
 // /*!
 //  *  \fn idleLightsEventHandler(int current_state, int decodedACQLNS, int decodedLNS)
 //  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
@@ -296,25 +296,22 @@ int lightsFSM(int lightType)
     int state = ST_LIGHTS_OFF;
 
     /* While FSM hasn't reach end state */
-    while (state != ST_ERROR)
+    /* Get event */
+    event = GetNextEvent(state);
+    /* For each transitions */
+    for (i = 0; i < TRANS_COUNT; i++)
     {
-        /* Get event */
-        event = GetNextEvent(state);
-        /* For each transitions */
-        for (i = 0; i < TRANS_COUNT; i++)
+        /* If State is current state OR The transition applies to all states ...*/
+        if ((state == trans[i].state) || (ST_ANY == trans[i].state))
         {
-            /* If State is current state OR The transition applies to all states ...*/
-            if ((state == trans[i].state) || (ST_ANY == trans[i].state))
+            /* If event is the transition event OR the event applies to all */
+            if ((event == trans[i].event) || (EV_ANY == trans[i].event))
             {
-                /* If event is the transition event OR the event applies to all */
-                if ((event == trans[i].event) || (EV_ANY == trans[i].event))
-                {
-                    /* Apply the new state */
-                    state = trans[i].next_state;
-                    /* Call the state function */
-                    ret = (trans[i].callback)(lightType);
-                    break;
-                }
+                /* Apply the new state */
+                state = trans[i].next_state;
+                /* Call the state function */
+                ret = (trans[i].callback(lightType));
+                break;
             }
         }
     }
