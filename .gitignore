@@ -1,2 +1,3 @@
 /app/bin
 .vscode
+/app/src/fsm.c.example

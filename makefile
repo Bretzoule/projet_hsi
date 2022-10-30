@@ -1,22 +1,23 @@
-ROOTDIR=./
+ROOTDIR=.
 TOOLSDIR=$(ROOTDIR)tools/
-APPDIR=$(ROOTDIR)app/
+APPDIR=$(ROOTDIR)/app/
+STATICDIR=$(APPDIR)static/
+RUN=run.sh
 
-include $(APPDIR)/makefile
 
-all: APP
+include $(APPDIR)makefile
+
+include $(APPDIR)makefile_static
+
+all: STATIC APP
 
 .PHONY: runall
-runall: rundriver runapp
+runall: preparerunall all
+	@./$(ROOTDIR)/$(RUN)
 
+.PHONY: preparerunall
+preparerunall:
+	@chmod +x $(ROOTDIR)/$(RUN)
 
-.PHONY: runapp
-runapp:
-	$(bindir)$(PROGNAME)
-
-
-.PHONY: rundriver
-rundriver:
-	./tools/driver &
-
-
+.PHONY: cleanall
+cleanall: cleangenerated mrproper

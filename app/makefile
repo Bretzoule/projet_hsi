@@ -3,7 +3,7 @@ CFLAGS = -Wall -pedantic -I $(INCLUDEDIR)
 LDFLAGS = -lm
 RM = rm -rf
 SRC = $(wildcard $(SRCDIR)*.c)
-STATIC = $(wildcard $(SRCDIR)*.a)
+INCLUDESTATIC = $(wildcard $(SRCDIR)*.a)
 HEAD = $(wildcard $(INCLUDEDIR)*.h)
 OBJ = $(subst $(SRCDIR), $(BINDIR),$(SRC:.c=.o))
 PROG = $(BINDIR)app
@@ -17,14 +17,15 @@ CP = cp
 APP: $(PROG)
 
 $(PROG): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(STATIC)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDESTATIC)
 
 $(BINDIR)%.o : $(SRCDIR)%.c
 	$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
 	
 .PHONY: clean
 clean :
-	$(RM) $(OBJ) core
+	@echo "Cleaning bin folder"
+	$(RM) $(OBJ) $(OBJSTATIC) core
 
 .PHONY: save
 save : savehead
@@ -34,7 +35,8 @@ savehead:
 
 .PHONY: mrproper
 mrproper :
-	$(RM) -f $(BINDIR)* $(DOCDIR)html/ $(DOCDIR)latex/ $(SAVEDIR)*
+	@echo "Cleaning everything"
+	@$(RM) -f $(BINDIR)* $(DOCDIR)html/ $(DOCDIR)latex/ $(SAVEDIR)* $(STATICDIR)
 	
 .PHONY: doxy
 doxy:
