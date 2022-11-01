@@ -22,6 +22,16 @@
 #define ST_TERM 255
 #define EV_NONE 0
 #define EV_ANY -1
+
+/* Cmd status */
+#define CMD_ON 1
+#define CMD_OFF 0
+
+/* Acq status */
+#define ACQ_ON 1
+#define ACQ_OFF 0
+
+/* Lights type */
 #define IDLE 1
 #define LOWBEAM 2
 #define HIGHBEAM 3
@@ -54,31 +64,31 @@
  *  \def EV_TURN_LIGHTS_OFF
  *  \brief Event status when the lights turn off
  */
-#define EV_TURN_LIGHTS_OFF 0
+#define EV_TURN_LIGHTS_OFF 1
 
 /*!
  *  \def EV_TURN_LIGHTS_ON
  *  \brief Event status when the lights turn on
  */
-#define EV_TURN_LIGHTS_ON 1
+#define EV_TURN_LIGHTS_ON 2
 
 /*!
  *  \def EV_ACQ_RECEIVED
  *  \brief Event status when the ACQ return has been received
  */
-#define EV_ACQ_RECEIVED 2
+#define EV_ACQ_RECEIVED 3
 
 /*!
- *  \def LIGHTS_MASK
- *  \brief mask to get the digit of idle lights indicator
+ *  \def EV_ACQ_NOT_RECEIVED
+ *  \brief Event status when the ACQ return has not been received
  */
-#define LIGHTS_MASK 0b01000000
+#define EV_ACQ_NOT_RECEIVED 4
 
 typedef struct
 {
     int state;
     int event;
-    int (*callback)(int lighttype);
+    int (*callback)(int);
     int next_state;
 } tTransition;
 
@@ -117,7 +127,7 @@ static int lightsOff(int type)
  *  \brief handles lightOn states
  *  \return 0
  */
-static int LightsOn(int type)
+static int lightsOn(int type)
 {
     switch (type)
     {
@@ -156,7 +166,7 @@ static int error(void)
  *  \brief handles acquitted states
  *  \return 0
  */
-static int acquitted(int type)
+static int acquittedLights(int type)
 {
     switch (type)
     {
@@ -186,118 +196,94 @@ static int fsmError(void)
     printf("FsmError\n");
     return 0;
 };
-static int notifyListeners(void);
 
 /* Transitions */
 tTransition trans[] = {
-    {ST_LIGHTS_OFF, EV_TURN_LIGHTS_ON, &lightsOff, ST_LIGHTS_ON},
+    {ST_LIGHTS_OFF, EV_TURN_LIGHTS_ON, &lightsOn, ST_LIGHTS_ON},
     {ST_LIGHTS_OFF, EV_TURN_LIGHTS_OFF, NULL, ST_LIGHTS_OFF},
     {ST_LIGHTS_ON, EV_TURN_LIGHTS_ON, NULL, ST_LIGHTS_ON},
     {ST_LIGHTS_ON, EV_TURN_LIGHTS_OFF, &lightsOff, ST_LIGHTS_OFF},
-    {ST_LIGHTS_ON, EV_NONE, &fsmError, ST_ERROR},
-    {ST_LIGHTS_ON, EV_ACQ_RECEIVED, &notifyListeners, ST_ACQ},
+    {ST_LIGHTS_ON, EV_ACQ_NOT_RECEIVED, &fsmError, ST_ERROR},
+    {ST_LIGHTS_ON, EV_ACQ_RECEIVED, &acquittedLights, ST_ACQ},
     {ST_ACQ, EV_TURN_LIGHTS_OFF, &lightsOff, ST_LIGHTS_OFF},
     {ST_ACQ, EV_TURN_LIGHTS_ON, NULL, ST_ACQ}};
-
-// /*!
-//  *  \fn idleLightsEventHandler(int current_state, int decodedACQLNS, int decodedLNS)
-//  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
-//  *  \version 0.1
-//  *  \date Dim 23 Octobre 2022 - 17:21:36
-//  *  \brief Computes event according to current lns values
-//  *  \param current_state : current state
-//  *  \param decodedACQLNS : decoded acq lns value
-//  *  \param decodedLNS : decoded lns value
-//  *  \return event value
-//  */
-// idleLightsEventHandler(int current_state, int decodedACQLNS, int decodedLNS)
-// {
-//     int event = EV_NONE;
-//     switch (current_state)
-//     {
-//     case ST_LIGHTS_OFF:
-//         if ((decodedLNS & LIGHTS_MASK) == 0b01000000)
-//             event = EV_TURN_LIGHTS_ON;
-//         if ((decodedLNS & LIGHTS_MASK) == 0b00000000)
-//             event = EV_TURN_LIGHTS_OFF;
-//         break;
-
-//     case ST_LIGHTS_ON:
-//         if ((decodedLNS & LIGHTS_MASK) == 0b01000000)
-//             event = EV_TURN_LIGHTS_ON;
-//         if ((decodedLNS & LIGHTS_MASK) == 0b00000000)
-//             event = EV_TURN_LIGHTS_OFF;
-//         if ((decodedACQLNS & LIGHTS_MASK) == 0b01000000)
-//             event = EV_ACQ_RECEIVED;
-//         // if(decodedACQLNS == 0) event = EV_NONE // ERROR
-//         break;
-//     case ST_ACQ:
-//         if ((decodedLNS & LIGHTS_MASK) == 0b01000000)
-//             event = EV_TURN_LIGHTS_ON;
-//         if ((decodedLNS & LIGHTS_MASK) == 0b00000000)
-//             event = EV_TURN_LIGHTS_OFF;
-//         break;
-//     }
-//     return (event);
-// }
-
 /*!
- *  \fn static int GetNextEvent(int current_state)
+ *  \fn static int GetNextEvent(int current_staten int lightType, int acqTimer)
  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
  *  \version 0.1
  *  \date Mar 18 Octobre 2022 - 20:23:29
  *  \brief gets next event for the fms
  *  \param int current_state: current fsm state
+ *  \param int lightType: type of light
+ *  \param int acqTimer: timer to check if the acq deadline hasnt been missed
  *  \return event : an event that will trigger a callback or not
  */
-static int GetNextEvent(int current_state)
+static int GetNextEvent(int current_state, int lightType, int acqTimer)
 {
     int event = EV_NONE;
+    int acqStatus;
+    int cmdStatus;
 
-    uint8_t decodedLNS = getLNS();
-    uint8_t decodedACQLNS = getACQLNS();
+    switch (lightType)
+    {
+    case IDLE:
+        acqStatus = getIdleIsAcquited();
+        cmdStatus = getisActivateStateLight();
+        break;
+    case LOWBEAM:
+        acqStatus = getHighBeamIsAcquited();
+        cmdStatus = getIsActivateDippedBeam();
+        break;
+    case HIGHBEAM:
+        acqStatus = getLowBeamIsAcquited();
+        cmdStatus = getIsActivateMainBeam();
+        break;
+    }
 
     switch (current_state)
     {
 
     /* switch case on states */
     case ST_LIGHTS_OFF:
-        event = getisActivateStateLight();
+        event = (cmdStatus == CMD_ON) ? EV_TURN_LIGHTS_ON : EV_TURN_LIGHTS_OFF;
         break;
     case ST_LIGHTS_ON:
-        event = getidleIsAcquited();
+        if (cmdStatus == CMD_ON)
+        {
+            event = EV_TURN_LIGHTS_ON;
+            if (acqStatus != ACQ_ON && acqTimer > 100)
+            {
+                event = EV_ACQ_NOT_RECEIVED;
+            }
+            else
+            {
+                if (acqStatus == cmdStatus)
+                {
+                    event = EV_ACQ_RECEIVED;
+                }
+            }
+        }
+        else
+        {
+            event = EV_TURN_LIGHTS_OFF;
+        }
         break;
     case ST_ACQ:
-        event = getidleIsAcquited();
+        event = (cmdStatus == CMD_OFF) ? EV_TURN_LIGHTS_OFF : EV_TURN_LIGHTS_ON;
         break;
-    case ST_ERROR:
-        break;
-        // TODO: Handle different light types cases
     }
-    // switch (selectedLight)
-    // {
-    // case IDLE:
-
-    //     break;
-    // case LOWBEAM:
-    //     break;
-    // case HIGHBEAM:
-    //     break;
-    // }
-
     return event;
 }
 
-int lightsFSM(int lightType)
+int lightsFSM(int lightType, int acqTimer)
 {
     int i = 0;
     int ret = 0;
     int event = EV_NONE;
     int state = ST_LIGHTS_OFF;
 
-    /* While FSM hasn't reach end state */
     /* Get event */
-    event = GetNextEvent(state);
+    event = GetNextEvent(state, lightType, acqTimer);
     /* For each transitions */
     for (i = 0; i < TRANS_COUNT; i++)
     {
