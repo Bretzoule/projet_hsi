@@ -159,14 +159,14 @@ static int turnLightOff(int side)
     switch (side)
     {
     case LEFT:
-        setIsActivateLeftBlinker(0);
+        setisActivateLeftBlinker(0);
         break;
     case RIGHT:
-        setIsActivateRightBlinker(0);
+        setisActivateRightBlinker(0);
         break;
     default:
-        setIsActivateRightBlinker(0);
-        setIsActivateLeftBlinker(0);
+        setisActivateRightBlinker(0);
+        setisActivateLeftBlinker(0);
     }
     return 0;
 }

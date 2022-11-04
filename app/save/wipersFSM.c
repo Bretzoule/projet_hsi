@@ -75,7 +75,7 @@ typedef struct
 {
     int state;
     int event;
-    int (*callback)(void);
+    int (*callback)(int);
     int next_state;
 } tTransition;
 
