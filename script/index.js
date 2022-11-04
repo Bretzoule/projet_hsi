@@ -5,7 +5,7 @@ const dotH = "types.h";
 const pathC = "app/static/";
 const dotC = "types.c";
 const types = typeAndData.types;
-const data = typeAndData.data;
+const structs = typeAndData.structs;
 
 function buildCustomType(element) {
   let myTypeToWrite;
@@ -31,16 +31,16 @@ typedef enum ${element.name} {
   return myTypeToWrite;
 }
 
-function buildGetterAndSetter(element) {
+function buildGetterAndSetter(element, structName) {
   let getter = `
 ${element.type} get${element.name}() {
-    return (bcgvDATA.${element.name});
+    return (${structName}.${element.name});
 }`;
 
   let setter = `
 void set${element.name}(${element.type} val) {
     if(${types.filter((x) => x.name == element.type)[0].domain}) {
-    bcgvDATA.${element.name} = val;
+    ${structName}.${element.name} = val;
     } else {
         printf("Error, value not in domain");
     }
@@ -56,18 +56,16 @@ function buildGetterAndSetterHeader(element) {
   let getter = `
 /*!
 *  \\fn ${element.type} get${element.name}()
-*  \\brief 
-*  \\param 
-*  \\return ${element.name}
+*  \\brief get param ${element.name}
+*  \\return ${element.name} ${element.type}
 */
 ${element.type} get${element.name}();`;
 
   let setter = `
 /*!
-*  \\proc void set${element.name}()
-*  \\brief 
-*  \\param 
-*  \\return ${element.name}
+*  \\fn void set${element.name}(${element.type} val)
+*  \\brief set param ${element.name} 
+*  \\param ${element.name} val : value to be setted
 */
 void set${element.name}(${element.type} val);`;
   return `
@@ -133,29 +131,28 @@ function endFiles() {
 
 function buildStructInit(data) {
   let defaultVal = "";
-  data.forEach((element) => {
+  data.content.forEach((element) => {
     defaultVal += `${element.initVal},`;
   });
   defaultVal = defaultVal.substring(0, defaultVal.length - 1);
-  return `static data_t bcgvDATA = {${defaultVal}};`;
+  return `static ${data.typedef} ${data.name} = {${defaultVal}};`;
 }
 
 function buildStruct(data) {
-  let content = "";
-  data.forEach((element) => {
-    content += `${element.type} ${element.name};
+  let contentIn = "";
+  data.content.forEach((element) => {
+    contentIn += `${element.type} ${element.name};
     `;
   });
 
   let struct = `
     /*!
- *  \\struct data
- *  \\brief Entire data of the program
+ *  \\struct ${data.name}
+ *  \\brief ${data.desc}
  */
-
-typedef struct data {
-     ${content}
-}data_t;
+typedef struct ${data.name} {
+     ${contentIn}
+}${data.typedef};
 `;
   return struct;
 }
@@ -165,14 +162,22 @@ function entryPoint() {
     writeToFile(buildCustomType(element), pathH, dotH);
   });
 
-  writeToFile(buildStructInit(data), pathC, dotC);
-
-  data.forEach((element) => {
-    writeToFile(buildGetterAndSetter(element), pathC, dotC);
-    writeToFile(buildGetterAndSetterHeader(element), pathH, dotH);
+  structs.forEach((struct) => {
+    writeToFile(buildStructInit(struct), pathC, dotC);
+    struct.content.forEach((element) => {
+      writeToFile(
+        buildGetterAndSetter(element, struct.name, struct.typedef),
+        pathC,
+        dotC
+      );
+      writeToFile(
+        buildGetterAndSetterHeader(element, struct.name),
+        pathH,
+        dotH
+      );
+    });
+    writeToFile(buildStruct(struct), pathH, dotH);
   });
-
-  writeToFile(buildStruct(data), pathH, dotH);
 }
 
 initFiles()

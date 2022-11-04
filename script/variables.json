@@ -14,12 +14,6 @@
       "domain": "val >= 0"
     },
     {
-      "name": "tramenb_t",
-      "type": "atom*",
-      "declaration": "uint8_t",
-      "domain": "(val = val % 100) || 1"
-    },
-    {
       "name": "km_t",
       "type": "atom*",
       "declaration": "uint32_t",
@@ -38,10 +32,10 @@
       "domain": "val < 3 && val >= 0"
     },
     {
-      "name": "motorissue_t",
+      "name": "engineissue_t",
       "type": "enum",
       "declaration": [
-        "noMotorIssue",
+        "noEngineIssue",
         "pressureError",
         "ldrTemperature",
         "oilOverheat"
@@ -58,7 +52,7 @@
       "name": "rpm_t",
       "type": "atom*",
       "declaration": "uint32_t",
-      "domain": "value <= 10000"
+      "domain": "val <= 10000"
     },
     {
       "name": "batteryissue_t",
@@ -79,149 +73,197 @@
       "domain": "val == 0 || val == 1"
     }
   ],
-  "data": [
+  "structs": [
     {
-      "id": "01",
-      "name": "isActivateWarning",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the warnings are on"
-    },
+      "name": "data",
+      "typedef": "data_t",
+      "desc": "Struct to hold entire data of the BCGV",
+      "content": [
+        {
+          "id": "01",
+          "name": "isActivateWarning",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the warnings are on"
+        },
+        {
+          "id": "02",
+          "name": "isActivateIdleLight",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the idle lights are on"
+        },
 
-    {
-      "id": "02",
-      "name": "isActivateStateLight",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the states lights are on"
-    },
+        {
+          "id": "03",
+          "name": "isActivateLowBeam",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the low beam are on"
+        },
 
-    {
-      "id": "03",
-      "name": "isActivateDippedBeam",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the dipped beam are on"
-    },
+        {
+          "id": "04",
+          "name": "isActivateHighBeam",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the high beam are on"
+        },
 
-    {
-      "id": "04",
-      "name": "isActivateMainBeam",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the main beam are on"
-    },
+        {
+          "id": "05",
+          "name": "isActivateRightBlinker",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the right turn signal is on"
+        },
 
-    {
-      "id": "05",
-      "name": "isActivateRightTurnSignal",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the right turn signal is on"
-    },
+        {
+          "id": "06",
+          "name": "isActivateLeftBlinker",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the left turn signal is on"
+        },
 
-    {
-      "id": "06",
-      "name": "isActivateLeftTurnSignal",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the left turn signal is on"
-    },
+        {
+          "id": "07",
+          "name": "isActivateWindshieldWiper",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the windshield wiper are on"
+        },
 
-    {
-      "id": "07",
-      "name": "isActivateWindshieldWiper",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the windshield wiper are on"
-    },
+        {
+          "id": "08",
+          "name": "isActivateIceWasher",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the ice washer are on"
+        },
+        {
+          "id": "09",
+          "name": "km",
+          "type": "km_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the nb of km"
+        },
 
-    {
-      "id": "08",
-      "name": "isActivateIceWasher",
-      "type": "isActivate_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the ice washer are on"
-    },
+        {
+          "id": "10",
+          "name": "speed",
+          "type": "speed_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the speed"
+        },
+        {
+          "id": "11",
+          "name": "frameIssue",
+          "type": "frameissue_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the issues on the frame"
+        },
+        {
+          "id": "12",
+          "name": "engineIssue",
+          "type": "engineissue_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the issues on the engine"
+        },
+        {
+          "id": "13",
+          "name": "fuelLevel",
+          "type": "fuellvl_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the fuel level"
+        },
+        {
+          "id": "14",
+          "name": "rpm",
+          "type": "rpm_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the rpm"
+        },
+        {
+          "id": "15",
+          "name": "batteryIssue",
+          "type": "batteryissue_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know the issues on the battery"
+        },
 
-    {
-      "id": "09",
-      "name": "crc8",
-      "type": "crc8_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know value of CR C8"
-    },
-
-    {
-      "id": "10",
-      "name": "trameNb",
-      "type": "tramenb_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know the nb of trame"
-    },
-
-    {
-      "id": "11",
-      "name": "km",
-      "type": "km_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know the nb of km"
-    },
-
-    {
-      "id": "12",
-      "name": "speed",
-      "type": "speed_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know the speed"
-    },
-
-    {
-      "id": "13",
-      "name": "frameIssue",
-      "type": "frameissue_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know the speed"
-    },
-
-    {
-      "id": "14",
-      "name": "idleIsAcquited",
-      "type": "isAcquited_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the light is on"
-    },
-
-    {
-      "id": "15",
-      "name": "highBeamIsAcquited",
-      "type": "isAcquited_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the light is on"
-    },
-
-    {
-      "id": "16",
-      "name": "lowBeamIsAcquited",
-      "type": "isAcquited_t",
-      "dimension": "1",
-      "initVal": "0",
-      "comment": "are used to know if the light is on"
+        {
+          "id": "16",
+          "name": "idleIsAcquited",
+          "type": "isAcquited_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the idle light is on and acquitted"
+        },
+        {
+          "id": "17",
+          "name": "lowBeamIsAcquited",
+          "type": "isAcquited_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the lowbeam light is on and acquitted"
+        },
+        {
+          "id": "18",
+          "name": "highBeamIsAcquited",
+          "type": "isAcquited_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the high beam light is on and acquitted"
+        },
+        {
+          "id": "19",
+          "name": "isActivateAndEnabledLeftBlinker",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the left blinker is on and enabled"
+        },
+        {
+          "id": "20",
+          "name": "isActivateAndEnabledRightBlinker",
+          "type": "isActivate_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the right blinker is on and enabled"
+        },
+        {
+          "id": "21",
+          "name": "isActivateAndEnabledAndAcquittedLeftBlinker",
+          "type": "isAcquited_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the left blinker is on and enabled and acquited"
+        },
+        {
+          "id": "22",
+          "name": "isActivateAndEnabledAndAcquittedRightBlinker",
+          "type": "isAcquited_t",
+          "dimension": "1",
+          "initVal": "0",
+          "comment": "are used to know if the right blinker is on and enabled and acquited"
+        }
+      ]
     }
   ]
 }
