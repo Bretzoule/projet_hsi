@@ -6,9 +6,10 @@ STATIC: $(STATICLIB)
 
 $(STATICLIB): $(OBJSTATIC)
 	ar rcs $@ $^
+	@make clean
 
-$(BINDIR)%.o: $(STATICDIR)%.c $(STATICDIR)%.h
-	gcc -c -o $@ $<
+$(BINDIR)%.o: $(STATICDIR)%.c $(INCLUDEDIR)%.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 .PHONY: cleangenerated
 cleangenerated:
