@@ -1,40 +1,29 @@
-CC = gcc
-CFLAGS = -Wall -pedantic -Iinclude
-LDFLAGS = -lm
-RM = rm -rf
-SRC = $(wildcard $(srcdir)*.c)
-HEAD = $(wildcard $(includedir)*.h)
-OBJ = $(subst $(srcdir), $(bindir),$(SRC:.c=.o))
-PROG = $(bindir)projet
-srcdir = ./src/
-docdir = ./doc/
-bindir = ./bin/
-savedir = ./save/
-includedir = ./include/
-CP = cp
+ROOTDIR=.
+TOOLSDIR=$(ROOTDIR)tools/
+APPDIR=$(ROOTDIR)/app/
+STATICDIR=$(APPDIR)static/
+SCRIPTDIR=$(ROOTDIR)/script/
+RUN=run.sh
+NODE=node
+generator_exec=$(SCRIPTDIR)index.js
 
-all: $(PROG)
+include $(APPDIR)makefile
 
-$(PROG): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+include $(APPDIR)makefile_static.mk
 
-./bin/%.o : ./src/%.c
-	$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
+all: GENERATOR STATIC APP
+
+GENERATOR:
+	@echo "Generating static"
+	@$(NODE) $(generator_exec)
+
+.PHONY: runall
+runall: preparerunall
+	@./$(ROOTDIR)/$(RUN)
+
+.PHONY: preparerunall
+preparerunall:
+	@chmod +x $(ROOTDIR)/$(RUN)
 	
-.PHONY: clean
-clean :
-	$(RM) $(OBJ) core
-
-.PHONY: save
-save : savehead
-	$(CP) $(SRC) $(savedir)
-savehead: 
-	$(CP) $(HEAD) $(savedir)
-
-.PHONY: mrproper
-mrproper :
-	$(RM) -f $(bindir)* $(docdir)html/ $(docdir)latex/ $(savedir)*
-	
-.PHONY: doxy
-doxy:
-	doxygen ./doc/Doxyfile && firefox ./doc/html/index.html
+.PHONY: cleanall
+cleanall: cleangenerated mrproper
