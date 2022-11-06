@@ -36,6 +36,18 @@
 #define ST_WIPERS_OFF 0
 
 /*!
+ *  \def ST_LG_OFF
+ *  \brief Manages state of the LG when it's off
+ */
+#define ST_LG_OFF 0
+
+/*!
+ *  \def ST_LG_ON
+ *  \brief Manages state of the LG when it's on
+ */
+#define ST_LG_ON 1
+
+/*!
  *  \def ST_WIPERS_ON
  *  \brief Manages state of the low beam wipers when it's on
  */
@@ -54,10 +66,22 @@
 #define EV_TURN_WIPERS_OFF 0
 
 /*!
+ *  \def EV_TURN_LG_OFF
+ *  \brief Event status when the lg turn off
+ */
+#define EV_TURN_LG_OFF 0
+
+/*!
  *  \def EV_TURN_WIPERS_ON
  *  \brief Event status when the wipers turn on
  */
 #define EV_TURN_WIPERS_ON 1
+
+/*!
+ *  \def EV_TURN_LG_ON
+ *  \brief Event status when the lg turn on
+ */
+#define EV_TURN_LG_ON 1
 
 /*!
  *  \def EV_ACQ_RECEIVED
@@ -105,13 +129,18 @@ static int wipersOff(int type)
     switch (type)
     {
     case 1:
-        setisActivateStateLight(0);
+        setisActivateWipers(0);
         break;
-    case 2:
-        setisActivateDippedBeam(0);
-        break;
-    case 3:
-        setisActivateMainBeam(0);
+    }
+    return 0;
+};
+
+static int lgOff(int type)
+{
+    switch (type)
+    {
+    case 1:
+        setisActivateLG(0);
         break;
     }
     return 0;
@@ -125,18 +154,23 @@ static int wipersOff(int type)
  *  \brief handles wipersOn states
  *  \return 0
  */
-static int LightsOn(int type)
+static int wipersOn(int type)
 {
     switch (type)
     {
     case 1:
-        setisActivateStateLight(1);
+        setisActivateWipers(1);
         break;
-    case 2:
-        setisActivateDippedBeam(1);
-        break;
-    case 3:
-        setisActivateMainBeam(1);
+    }
+    return 0;
+};
+
+static int lgOn(int type)
+{
+    switch (type)
+    {
+    case 1:
+        setisActivateLG(1);
         break;
     }
     return 0;
@@ -169,14 +203,21 @@ static int acquitted(int type)
     switch (type)
     {
     case 1:
-        setidleIsAcquited(1);
+        setwipersIsAcquited(1);
         break;
-    case 2:
-        sethighBeamIsAcquited(1);
+
+    }
+    return 0;
+};
+
+static int acquittedlg(int type)
+{
+    switch (type)
+    {
+    case 1:
+        setlgIsAcquited(1);
         break;
-    case 3:
-        setlowBeamIsAcquited(1);
-        break;
+
     }
     return 0;
 };
@@ -195,6 +236,8 @@ static int fsmError(void)
     return 0;
 };
 static int notifyListeners(void);
+
+
 
 // /*!
 //  *  \fn idleLightsEventHandler(int current_state, int decodedACQLNS, int decodedLNS)
@@ -258,29 +301,36 @@ static int GetNextEvent(int current_state)
     {
 
     /* switch case on states */
-    case ST_WIPERS_OFF:
-        event = getisActivateStateLight();
+    case ST_WIPERS_OFF && ST_LG_OFF:
+        event = (cmdStatus ==CMD_ON) ? EV_TURN_WIPERS_ON : EV_TURN_WIPERS_OFF : EV_TURN_LG_ON : EV_TURN_LG_OFF;
         break;
-    case ST_WIPERS_ON:
-        event = getidleIsAcquited();
+    case ST_WIPERS_ON && ST_LG_OFF:
+        if (cmdStatus == CMD_ON)
+        {
+            event = EV_TURN_WIPERS_ON;
+            if (acqStatus!= ACQ_ON && acqTimer > 100)
+            {
+                event = EV_ACQ_NOT_RECEIVED;
+            }
+            else
+            {
+                if (acqStatus == cmdStatus)
+                {
+                    event = EV_ACQ_RECEIVED;
+                }
+        
+            }
+            
+        }
+        else
+        {
+            event = EV_TURN_WIPERS_OFF
+        }
         break;
     case ST_ACQ:
-        event = getidleIsAcquited();
-        break;
-    case ST_ERROR:
+        event = (cmdStatus == CMD_OFF) ? EV_TURN_WIPERS_OFF : EV_TURN_WIPERS_ON;
         break;
     }
-    // switch (selectedLight)
-    // {
-    // case IDLE:
-
-    //     break;
-    // case LOWBEAM:
-    //     break;
-    // case HIGHBEAM:
-    //     break;
-    // }
-
     return event;
 }
 
