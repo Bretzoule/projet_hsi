@@ -1,3 +1,9 @@
+/**
+ * @file Code generator for the bcgv app.
+ * @details Generates types and structures from the variable.json file into .c/.h files.
+ * @author Thomas LEFLOCH <hi@bretzoule.eu>
+ */
+
 const typeAndData = require("./variables.json");
 const fs = require("fs");
 const pathH = "app/static/";
@@ -42,7 +48,9 @@ void set${element.name}(${element.type} val) {
     if(${types.filter((x) => x.name == element.type)[0].domain}) {
     ${structName}.${element.name} = val;
     } else {
-        printf("Error, value not in domain ${element.name} doesnt accept : %d\\n", val);
+        printf("Error, value not in domain ${
+          element.name
+        } doesnt accept : %d\\n", val);
     }
 }`;
   return `
