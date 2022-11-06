@@ -1,7 +1,7 @@
 /**
- * \file main.c
- * \brief Description breve
- * \details Details ou notes d’implementation (peut rester vide)
+ * \file app.c
+ * \brief Entry point for the app
+ * \details Main entry point
  * \author Mathilde HAMON <hamonmathi@cy-tech.fr>
  */
 

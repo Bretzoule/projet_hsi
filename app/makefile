@@ -40,4 +40,4 @@ mrproper :
 	
 .PHONY: doxy
 doxy:
-	@doxygen $(DOCDIR)/Doxyfile && firefox $(DOCDIR)/html/index.html
+	@doxygen $(DOCDIR)Doxyfile && firefox doc/html/index.html
