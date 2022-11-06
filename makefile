@@ -1,22 +1,29 @@
-ROOTDIR=./
+ROOTDIR=.
 TOOLSDIR=$(ROOTDIR)tools/
-APPDIR=$(ROOTDIR)app/
+APPDIR=$(ROOTDIR)/app/
+STATICDIR=$(APPDIR)static/
+SCRIPTDIR=$(ROOTDIR)/script/
+RUN=run.sh
+NODE=node
+generator_exec=$(SCRIPTDIR)index.js
 
-include $(APPDIR)/makefile
+include $(APPDIR)makefile
 
-all: APP
+include $(APPDIR)makefile_static.mk
 
-PHONY: runall
-runall: rundriver runapp
+all: GENERATOR STATIC APP
 
+GENERATOR:
+	@echo "Generating static"
+	@$(NODE) $(generator_exec)
 
-PHONY: runapp
-runapp:
-	$(bindir)$(PROGNAME)
+.PHONY: runall
+runall: preparerunall
+	@./$(ROOTDIR)/$(RUN)
 
-
-PHONY: rundriver
-rundriver:
-	./tools/driver &
-
-
+.PHONY: preparerunall
+preparerunall:
+	@chmod +x $(ROOTDIR)/$(RUN)
+	
+.PHONY: cleanall
+cleanall: cleangenerated mrproper
