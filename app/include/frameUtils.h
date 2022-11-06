@@ -14,7 +14,9 @@
 // Including library headers
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "drv_api.h"
+#include "checksum.h"
 #include "types.h"
 
 /*!
@@ -89,6 +91,36 @@
 #define ICE_WASHER_MASK 0x01
 
 /*!
+ *  \def BCGV_BGF_MESSAGEQUEUE_SIZE
+ *  \brief Size of the BCGV to BGF LNS Message Queue size
+ */
+#define BCGV_BGF_MESSAGEQUEUE_SIZE 5
+
+/*!
+ *  \fn int buildAndSendLNSFrame(int32_t drvFd, lns_frame_t  (*frameToSend)[BCGV_BGF_MESSAGEQUEUE_SIZE])
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Sam 05 Novembre 2022 - 01:30:53
+ *  \brief Build and send LNS Frame
+ *  \param int32_t drvFd : Driver file descriptor.
+ *  \param lns_frame_t  (*frameToSend)[BCGV_BGF_MESSAGEQUEUE_SIZE](out): lnsFrame to send
+ *  \return DRV_SUCCESS, or DRV_ERROR if an error occurs (errno is set)
+ */
+int buildAndSendLNSFrame(int32_t drvFd, lns_frame_t (*frameToSend)[BCGV_BGF_MESSAGEQUEUE_SIZE]);
+
+/*!
+ *  \fn int buildAndSendUDPFrame(int32_t drvFd, uint8_t (*udpFrameToSend)[DRV_UDP_20MS_FRAME_SIZE])
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Sam 05 Novembre 2022 - 01:30:53
+ *  \brief Build and send UDP Frame
+ *  \param int32_t drvFd : Driver file descriptor.
+ *  \param uint8_t (*udpFrameToSend)[DRV_UDP_20MS_FRAME_SIZE](out) : udpFrame to send
+ *  \return DRV_SUCCESS, or DRV_ERROR if an error occurs (errno is set)
+ */
+int buildAndSendUDPFrame(int32_t drvFd, uint8_t (*udpFrameToSend)[DRV_UDP_20MS_FRAME_SIZE]);
+
+/*!
  *  \fn int decodeLNS(lns_frame_t lnsFrame)
  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
  *  \version 0.1
@@ -130,13 +162,37 @@ void debugBCGV();
 void debugFrameLNS(lns_frame_t lnsFrame);
 
 /*!
- *  \fn void debugFrameLNS(uint8_t* udpFrame)
+ *  \fn void lnsContentChecker(lns_frame_t *lnsFrame, uint32_t frameLength)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Sam 05 Novembre 2022 - 01:03:26
+ *  \brief Check the content of the LNS value by calculating crc8 on it.
+ *  \param lns_frame_t *lnsFrame : lns frame received
+ *  \param uint32_t frameLength : size of the receveived frame
+ */
+void lnsContentChecker(lns_frame_t *lnsFrame, uint32_t frameLength);
+
+/*!
+ *  \fn int lnsACQChecker(lns_frame_t *sentlnsFrame, lns_frame_t *lnsFrame, uint32_t frameLength)
+ *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
+ *  \version 0.1
+ *  \date Sam 05 Novembre 2022 - 01:03:26
+ *  \brief Check the content of the LNS value
+ *  \param lns_frame_t *sentlnsFrame : previously sent lns frame
+ *  \param lns_frame_t *lnsFrame : lns frame received
+ *  \param uint32_t frameLength : size of the receveived frame
+ *  \return acq : status of the acq
+ */
+int lnsACQChecker(lns_frame_t *sentlnsFrame, lns_frame_t *lnsFrame, uint32_t frameLength);
+/*!
+ *  \fn void debugFrameUDP(uint8_t *udpFrame, uint8_t frameSize)
  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
  *  \version 0.1
  *  \date Mer 02 Novembre 2022 - 23:08:54
  *  \param uint8_t* udpFrame : UDP Frame to debug
+ *  \param uint8_t frameLength : size of the frame
  *  \brief Debugs data from UDP frame
  */
-void debugFrameUDP(uint8_t *udpFrame);
+void debugFrameUDP(uint8_t *udpFrame, uint8_t frameSize);
 
 #endif

@@ -117,7 +117,7 @@ static int lightsOff(int type)
         break;
     }
     return 0;
-};
+}
 
 /*!
  *  \fn static int lightsOn(int type)
@@ -142,7 +142,7 @@ static int lightsOn(int type)
         break;
     }
     return 0;
-};
+}
 
 /*!
  *  \fn static int error(void)
@@ -156,7 +156,7 @@ static int error(void)
 {
     printf("Error\n");
     return 0;
-};
+}
 
 /*!
  *  \fn static int acquitted(int type)
@@ -181,7 +181,7 @@ static int acquittedLights(int type)
         break;
     }
     return 0;
-};
+}
 
 /*!
  *  \fn static int fsmError(void)
@@ -195,7 +195,7 @@ static int fsmError(void)
 {
     printf("FsmError\n");
     return 0;
-};
+}
 
 /* Transitions */
 tTransition trans[] = {

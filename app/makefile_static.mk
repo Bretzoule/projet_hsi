@@ -5,11 +5,13 @@ STATICLIB = $(SRCDIR)types.a
 STATIC: $(STATICLIB)
 
 $(STATICLIB): $(OBJSTATIC)
-	ar rcs $@ $^
+	@ar rcs $@ $^
 	@make clean
+	@cp $(STATICDIR)*.h $(INCLUDEDIR)
 
-$(BINDIR)%.o: $(STATICDIR)%.c $(INCLUDEDIR)%.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(BINDIR)%.o: $(STATICDIR)%.c $(STATICDIR)%.h 
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
 
 .PHONY: cleangenerated
 cleangenerated:

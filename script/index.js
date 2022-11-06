@@ -42,7 +42,7 @@ void set${element.name}(${element.type} val) {
     if(${types.filter((x) => x.name == element.type)[0].domain}) {
     ${structName}.${element.name} = val;
     } else {
-        printf("Error, value not in domain");
+        printf("Error, value not in domain ${element.name} doesnt accept : %d\\n", val);
     }
 }`;
   return `

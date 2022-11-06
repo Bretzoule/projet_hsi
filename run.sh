@@ -1,5 +1,6 @@
 echo "Starting driver..."
 ./tools/driver &
 echo "Driver started."
-echo "Starting program."
+sleep 0.5
+echo "Starting program, now."
 ./app/bin/app

@@ -6,49 +6,44 @@
  */
 
 #include <unistd.h>
-#include "checksum.h"
 #include "frameUtils.h"
+// #include "fsm.h"
 
 /*!
- *  \fn void debugLNS(lns_frame_t lnsFrame, uint8_t crc8Check, uint32_t frameLength)
+ *  \fn int main (int argc, char** argv)
  *  \author LEFLOCH Thomas <leflochtho@eisti.eu>
  *  \version 0.1
- *  \date Mar 01 Novembre 2022 - 18:11:47
+ *  \date Dim 06 Novembre 2022 - 19:07:35
+ *  \brief Main program
+ *  \param argc : Number of params at runtime
+ *  \param argv : Parameters
+ *  \return int32_t : main
  */
-void debugLNS(lns_frame_t *lnsFrame, uint8_t crc8Check, uint32_t frameLength)
-{
-    printf("Print HEX : %x -- CRC8 : %x == %x || Frame Length : %d\r\n", (lnsFrame[0]).frame[1], (lnsFrame[0]).frame[0], crc8Check, frameLength);
-}
-
-/**
- * \brief Description breve de la fonction.
- * \details Details ou notes d’implementation (peut rester vide)
- * \param param1 : Description
- * \param param2 : Description
- * \return int32_t : main
- */
-int32_t main(int argc, char const *argv[])
+int main(int argc, char const *argv[])
 {
     uint8_t lnsTimer = 0;
     uint8_t udpFrame[DRV_UDP_10MS_FRAME_SIZE];
+    uint8_t udpFrameToSend[DRV_UDP_20MS_FRAME_SIZE];
     lns_frame_t lnsFrame[DRV_MAX_FRAMES];
+    lns_frame_t lnsFrameToSend[BCGV_BGF_MESSAGEQUEUE_SIZE];
     uint32_t frameLength;
-    uint8_t crc8Check;
     int32_t drvStatus;
     int32_t drvFd;
+    bool udpTimer = false;
+    int8_t acq = 0;
     int frameExpected = 1;
-    char frameAsString[1];
+
     // Open connection with driver
     drvFd = drv_open();
-    while (1)
+    while (drvFd != DRV_ERROR)
     {
+        /* UDP FRAME READING */
         drvStatus = drv_read_udp_10ms(drvFd, udpFrame);
         if (drvStatus != DRV_ERROR)
         {
-            debugFrameUDP(udpFrame);
             if (udpFrame[0] != frameExpected)
             {
-                printf("Exception : Frame number invalid. \r\n Received %d, expected %d", udpFrame[0], frameExpected);
+                printf("Exception : Frame number invalid - received %d, expected %d\n", udpFrame[0], frameExpected);
             }
             else
             {
@@ -56,32 +51,37 @@ int32_t main(int argc, char const *argv[])
                 decodeUDP(udpFrame);
             }
         }
-        if (lnsTimer < 10)
+
+        /* UDP FRAME READING */
+        if (drv_read_lns(drvFd, lnsFrame, &frameLength) != DRV_ERROR)
         {
-            lnsTimer++;
+            lnsContentChecker(lnsFrame, frameLength);
         }
         else
         {
-            drvStatus = drv_read_lns(drvFd, lnsFrame, &frameLength);
-            if (drvStatus != DRV_ERROR)
+            printf("En error happened during LNS frame reading...\n");
+        }
+
+        /* LNS FRAME SENDING */
+        if (buildAndSendLNSFrame(drvFd, &lnsFrameToSend) != DRV_ERROR)
+        {
+            if (drv_read_lns(drvFd, lnsFrame, &frameLength) != DRV_ERROR)
             {
-                crc8Check = crc_8(&(lnsFrame[0]).frame[1], sizeof(frameAsString));
-                debugFrameLNS(lnsFrame[0]);
-                if (crc8Check == (lnsFrame[0]).frame[0])
-                {
-                    decodeLNS(lnsFrame[0]);
-                }
-                else
-                {
-                    printf("Exception : CRC8 invalid. \r\n Received %d, expected %d", (lnsFrame[0]).frame[0], crc8Check);
-                }
+                printf("frameLenght = %d\n", frameLength);
+                // FIXME:  Understand WHY the acq check doesnt work and why the lns doesnt answer properly
+                acq = lnsACQChecker(lnsFrameToSend, lnsFrame, frameLength);
+                printf("ACQ = %d\n", acq);
             }
         }
-        debugBCGV();
-        // TODO: Call different state machines
-        // TODO: Send UDP
-        // TODO: Send LNS
-        sleep(0.1);
+        else
+        {
+            printf("En error happened during LNS frame sending...\n");
+        }
+        /* UDP FRAME SENDING */
+        if (buildAndSendUDPFrame(drvFd, &udpFrameToSend) == DRV_ERROR)
+        {
+            printf("En error happened during UDP frame sending...\n");
+        }
     }
-    return (EXIT_SUCCESS);
+    return (drvFd);
 }

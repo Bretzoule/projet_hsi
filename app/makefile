@@ -17,27 +17,27 @@ CP = cp
 APP: $(PROG)
 
 $(PROG): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDESTATIC)
+	@$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(INCLUDESTATIC)
 
 $(BINDIR)%.o : $(SRCDIR)%.c
-	$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
+	@$(CC) $(CFLAGS)  -c $^ -o $@ $(LDFLAGS)
 	
 .PHONY: clean
 clean :
 	@echo "Cleaning bin folder"
-	$(RM) $(OBJ) $(OBJSTATIC) core
+	@$(RM) $(OBJ) $(OBJSTATIC) core
 
 .PHONY: save
 save : savehead
-	$(CP) $(SRC) $(SAVEDIR)
+	@$(CP) $(SRC) $(SAVEDIR)
 savehead: 
-	$(CP) $(HEAD) $(SAVEDIR)
+	@$(CP) $(HEAD) $(SAVEDIR)
 
 .PHONY: mrproper
 mrproper :
 	@echo "Cleaning everything"
-	@$(RM) -f $(BINDIR)* $(DOCDIR)html/ $(DOCDIR)latex/ $(SAVEDIR)* $(STATICDIR)
+	@$(RM) -f $(BINDIR)* $(DOCDIR)html/ $(DOCDIR)latex/ $(STATICDIR)
 	
 .PHONY: doxy
 doxy:
-	doxygen ./doc/Doxyfile && firefox ./doc/html/index.html
+	@doxygen $(DOCDIR)/Doxyfile && firefox $(DOCDIR)/html/index.html
