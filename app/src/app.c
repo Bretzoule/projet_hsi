@@ -21,7 +21,6 @@
  */
 int main(int argc, char const *argv[])
 {
-    uint8_t lnsTimer = 0;
     uint8_t udpFrame[DRV_UDP_10MS_FRAME_SIZE];
     uint8_t udpFrameToSend[DRV_UDP_20MS_FRAME_SIZE];
     lns_frame_t lnsFrame[DRV_MAX_FRAMES];
@@ -29,11 +28,10 @@ int main(int argc, char const *argv[])
     uint32_t frameLength;
     int32_t drvStatus;
     int32_t drvFd;
-    bool udpTimer = false;
     int8_t acq = 0;
     int frameExpected = 1;
 
-    // Open connection with driver
+    /* Initialisation */
     drvFd = drv_open();
     while (drvFd != DRV_ERROR)
     {
@@ -61,6 +59,10 @@ int main(int argc, char const *argv[])
         {
             printf("En error happened during LNS frame reading...\n");
         }
+
+        /* RUNNING FSMs */
+
+        // TODO: Integrate FSMs
 
         /* LNS FRAME SENDING */
         if (buildAndSendLNSFrame(drvFd, &lnsFrameToSend) != DRV_ERROR)
