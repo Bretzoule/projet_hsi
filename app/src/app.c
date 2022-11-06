@@ -28,7 +28,6 @@ int main(int argc, char const *argv[])
     uint32_t frameLength;
     int32_t drvStatus;
     int32_t drvFd;
-    int8_t acq = 0;
     int frameExpected = 1;
 
     /* Initialisation */
@@ -69,10 +68,8 @@ int main(int argc, char const *argv[])
         {
             if (drv_read_lns(drvFd, lnsFrame, &frameLength) != DRV_ERROR)
             {
-                printf("frameLenght = %d\n", frameLength);
                 // FIXME:  Understand WHY the acq check doesnt work and why the lns doesnt answer properly
-                acq = lnsACQChecker(lnsFrameToSend, lnsFrame, frameLength);
-                printf("ACQ = %d\n", acq);
+                lnsACQChecker(lnsFrameToSend, lnsFrame, frameLength);
             }
         }
         else
